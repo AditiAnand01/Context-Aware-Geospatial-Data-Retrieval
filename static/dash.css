@@ -1,0 +1,109 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('background.jpg');
+    margin: 0;
+    padding: 0;
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    
+}
+
+h1 {
+    text-align: center;
+    color: #ffffff;
+    margin-top: 15px;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Styling the Navigation Strip */
+       
+.nav-strip {
+    background-color: rgba(12, 0, 50, 0.5);
+    overflow:hidden;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+.glow {
+    color: #fff;  /* White text color */
+    text-shadow: 0 0 1px #fff,  /* Subtle white glow */
+                 0 0 1px #fff,
+                 0 0 2px #fff;
+}
+
+.nav-strip a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 14px;
+    text-decoration: none;
+}
+
+.nav-strip a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+/* Centering the APOD image */
+.apod-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.apod-container img {
+    width: 600px;
+    height: 400px;
+    object-fit: cover; 
+}
+
+/* Features Section */
+/* Container for features */
+/* Container for features */
+.features-container {
+    display: flex; /* Enable Flexbox */
+    color: #ddd;
+    justify-content: space-between; /* Space out columns */
+    gap: 20px; /* Space between columns */
+    padding: 20px; /* Padding around container */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Individual feature box */
+.feature {
+    flex: 1; /* Grow to fill available space */
+    padding: 20px;
+    background-color: rgba(31, 21, 73, 0.5); /* Semi-transparent background color */
+    /*border: 1px dashed #ddd; /* Border around each feature */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+.feature:hover {
+    background-color: rgba(73, 70, 172, 0.5); /* Darker or different color on hover */
+}
+/* Make sure content inside features is centered */
+.feature h2 {
+    margin-top: 0;
+}
+
+/* Make sure content inside features is centered */
+
+
+
+/* rgba(25, 18, 62, 0.5)Logout Buttonrgba(106, 103, 185, 0.5) */
+form button {
+    align-content:last baseline;
+    margin-left: 630px;
+    background-color: #f75858;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #fa3434;
+}

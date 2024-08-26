@@ -1,0 +1,98 @@
+/* styles.css */
+
+/* General body styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: url('background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.glow {
+    color: #fff;  /* White text color */
+    text-shadow: 0 0 1px #fff,  /* Subtle white glow */
+                 0 0 1px #fff,
+                 0 0 2px #fff;
+}
+
+h1{
+color: #ffffff; /* White text color for header */
+    text-align: center;
+    margin-top: 1px;
+    margin-bottom: 20px;
+}
+/* Container for the form */
+.form-container {
+    background: rgba(93, 91, 162, 0.5); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    height: 480px;
+}
+
+/* Form group styling */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+/* Label styling */
+.form-group label {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Input field styling */
+.form-control {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+/* Error message styling */
+.error {
+    color: #ff4c4c;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Submit button styling */
+.btn-primary {
+    background-color: #0c0032;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #8a8abb;
+}
+
+/* Link styling */
+p a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+p {
+    color: #ffffff; /* White text color for paragraph */
+    text-align: center;
+    margin-top: 12px;
+}

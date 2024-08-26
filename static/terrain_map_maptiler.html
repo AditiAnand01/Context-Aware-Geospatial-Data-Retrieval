@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display a 3D Map</title>
+  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.js"></script>
+  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      padding: 5px;
+      width: 150px;
+      margin-right: 10px;
+      font-size: 14px;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 5px 10px;
+      font-size: 14px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #infoBox {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 2;
+      width: 300px;
+      cursor: move;
+    }
+
+    #locationDetails {
+      position: absolute;
+      top: 70px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 2;
+      width: 300px;
+    }
+
+    #locationDetails img {
+      width: 100%;
+      border-radius: 3px;
+      margin-top: 10px;
+    }
+
+    .section {
+      margin-bottom: 10px;
+    }
+
+    .section h3 {
+      margin: 0;
+      padding: 5px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .sectionContent {
+      display: none;
+      padding: 10px;
+      background-color: #f7f7f7;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="controls">
+    <input type="text" id="locationInput" placeholder="Enter location name" />
+    <button onclick="fetchLocation()">Go</button>
+  </div>
+  <div id="infoBox">
+    <div class="section" id="currentSection">
+      <h3 onclick="toggleSection('currentContent')">Current Weather ▼</h3>
+      <div class="sectionContent" id="currentContent"></div>
+    </div>
+    <div class="section" id="forecastSection">
+      <h3 onclick="toggleSection('forecastContent')">Forecast ▼</h3>
+      <div class="sectionContent" id="forecastContent"></div>
+    </div>
+    <div class="section" id="astronomySection">
+      <h3 onclick="toggleSection('astronomyContent')">Astronomy ▼</h3>
+      <div class="sectionContent" id="astronomyContent"></div>
+    </div>
+  </div>
+  <div id="locationDetails"></div>
+
+  <script>
+    maptilersdk.config.apiKey = 'BIHEyfhJOuvrjoLpeeBe';
+    const map = new maptilersdk.Map({
+      container: 'map', // container id
+      style: maptilersdk.MapStyle.OUTDOOR,
+      center: [8.94738, 45.97812], // starting position [lng, lat]
+      zoom: 14, // starting zoom
+      pitch: 70,
+      bearing: -100.86,
+      maxPitch: 85,
+      maxZoom: 14,
+      terrain: true,
+      terrainControl: true
+    });
+
+    function fetchLocation() {
+      const locationName = document.getElementById('locationInput').value.trim();
+      const apiKey = '7751541ae2294226995173916240608'; // Your WeatherAPI key
+
+      if (locationName) {
+        fetch(`http://api.weatherapi.com/v1/search.json?key=${apiKey}&q=${locationName}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.length > 0) {
+              const location = data[0]; // Get the first result
+              const latitude = location.lat;
+              const longitude = location.lon;
+              map.flyTo({
+                center: [longitude, latitude],
+                zoom: 14,
+                pitch: 70,
+                bearing: -100.86,
+                essential: true
+              });
+
+              fetchWeatherData('current', locationName);
+              fetchWeatherData('forecast', locationName);
+              fetchWeatherData('astronomy', locationName);
+              fetchWikipediaData(locationName); // Fetch Wikipedia data
+            } else {
+              alert('Location not found. Please try again.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while fetching the location.');
+          });
+      } else {
+        alert('Please enter a location name.');
+      }
+    }
+
+    function fetchWeatherData(apiMethod, locationName) {
+      const apiKey = '7751541ae2294226995173916240608'; // Your WeatherAPI key
+      fetch(`http://api.weatherapi.com/v1/${apiMethod}.json?key=${apiKey}&q=${locationName}`)
+        .then(response => response.json())
+        .then(data => {
+          displayInfo(apiMethod, data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert(`An error occurred while fetching the ${apiMethod} data.`);
+        });
+    }
+
+    function fetchWikipediaData(location) {
+      const url = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&exintro&explaintext&piprop=original&titles=${encodeURIComponent(location)}&format=json&origin=*`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const page = data.query.pages;
+          const pageId = Object.keys(page)[0];
+
+          if (pageId === "-1") {
+            document.getElementById('locationDetails').innerHTML = 'Location not found on Wikipedia.';
+          } else {
+            const extract = page[pageId].extract;
+            const imageUrl = page[pageId].original ? page[pageId].original.source : null;
+            displayLocationDetails(extract, imageUrl);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+
+    window.onload = function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const latitude = parseFloat(urlParams.get('lat'));
+    const longitude = parseFloat(urlParams.get('lon'));
+
+    if (!isNaN(latitude) && !isNaN(longitude)) {
+        map.flyTo({
+            center: [longitude, latitude],
+            zoom: 14,
+            pitch: 70,
+            bearing: -100.86,
+            essential: true
+        });
+
+        // Fetch weather and other data based on the coordinates
+        fetchWeatherData('current', `${latitude},${longitude}`);
+        fetchWeatherData('forecast', `${latitude},${longitude}`);
+        fetchWeatherData('astronomy', `${latitude},${longitude}`);
+    }
+}
+
+
+
+
+    function displayInfo(apiMethod, data) {
+      const sectionContent = document.getElementById(`${apiMethod}Content`);
+      sectionContent.innerHTML = ''; // Clear previous content
+
+      function addContent(label, value) {
+        if (value !== undefined) {
+          sectionContent.innerHTML += `<p><strong>${label}:</strong> ${value}</p>`;
+        }
+      }
+
+      if (apiMethod === 'current' && data.current) {
+        addContent('Temperature', data.current.temp_c + ' °C');
+        addContent('Condition', data.current.condition.text);
+        addContent('Wind Speed', data.current.wind_kph + ' kph');
+        addContent('Wind Degree', data.current.wind_degree + '°');
+        addContent('Wind Direction', data.current.wind_dir);
+        addContent('Pressure', data.current.pressure_mb + ' mb');
+        addContent('Precipitation', data.current.precip_mm + ' mm');
+        addContent('Humidity', data.current.humidity + '%');
+        addContent('Feels Like', data.current.feelslike_c + ' °C');
+      }
+
+      if (apiMethod === 'forecast' && data.forecast) {
+        data.forecast.forecastday.forEach(day => {
+          sectionContent.innerHTML += `<h4>${day.date}</h4>`;
+          addContent('Max Temperature', day.day.maxtemp_c + ' °C');
+          addContent('Min Temperature', day.day.mintemp_c + ' °C');
+          addContent('Avg Temperature', day.day.avgtemp_c + ' °C');
+          addContent('Condition', day.day.condition.text);
+          addContent('Wind Speed', day.day.maxwind_kph + ' kph');
+          addContent('Wind Direction', day.day.wind_dir);
+          addContent('Precipitation', day.day.totalprecip_mm + ' mm');
+          addContent('Avg Humidity', day.day.avghumidity + '%');
+          addContent('UV Index', day.day.uv);
+          sectionContent.innerHTML += '<hr>';
+        });
+      }
+
+      if (apiMethod === 'astronomy' && data.astronomy) {
+        addContent('Sunrise', data.astronomy.astro.sunrise);
+        addContent('Sunset', data.astronomy.astro.sunset);
+        addContent('Moonrise', data.astronomy.astro.moonrise);
+        addContent('Moonset', data.astronomy.astro.moonset);
+        addContent('Moon Phase', data.astronomy.astro.moon_phase);
+        addContent('Moon Illumination', data.astronomy.astro.moon_illumination + '%');
+      }
+
+      sectionContent.style.display = 'block'; // Show the section content
+    }
+
+    function displayLocationDetails(extract, imageUrl) {
+      const locationDetails = document.getElementById('locationDetails');
+      locationDetails.innerHTML = `<p>${extract}</p>`;
+      if (imageUrl) {
+        locationDetails.innerHTML += `<img src="${imageUrl}" alt="Image of Location">`;
+      }
+    }
+
+    function toggleSection(sectionId) {
+      const sectionContent = document.getElementById(sectionId);
+      sectionContent.style.display = sectionContent.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display a 3D Map</title>
+  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.js"></script>
+  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 60px;
+      bottom: 0;
+      width: 100%;
+    }
+
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 1;
+    }
+
+    input[type="text"] {
+      padding: 5px;
+      width: 150px;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 5px 10px;
+      font-size: 14px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #infoBox {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 2;
+      width: 300px;
+      cursor: move;
+    }
+
+    #locationDetails {
+      position: absolute;
+      top: 70px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 2;
+      width: 300px;
+    }
+
+    #locationDetails img {
+      width: 100%;
+      border-radius: 3px;
+      margin-top: 10px;
+    }
+
+    .section {
+      margin-bottom: 10px;
+    }
+
+    .section h3 {
+      margin: 0;
+      padding: 5px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .sectionContent {
+      display: none;
+      padding: 10px;
+      background-color: #f7f7f7;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <label for="locationInput">Location Name:</label>
+    <input type="text" id="locationInput" placeholder="Enter location name" />
+    <button onclick="fetchLocation()">Go</button>
+  </div>
+  <div id="map"></div>
+  <div id="infoBox">
+    <div class="section" id="currentSection">
+      <h3 onclick="toggleSection('currentContent')">Current Weather ▼</h3>
+      <div class="sectionContent" id="currentContent"></div>
+    </div>
+    <div class="section" id="forecastSection">
+      <h3 onclick="toggleSection('forecastContent')">Forecast ▼</h3>
+      <div class="sectionContent" id="forecastContent"></div>
+    </div>
+    <div class="section" id="astronomySection">
+      <h3 onclick="toggleSection('astronomyContent')">Astronomy ▼</h3>
+      <div class="sectionContent" id="astronomyContent"></div>
+    </div>
+  </div>
+  <div id="locationDetails"></div>
+
+  <script>
+    maptilersdk.config.apiKey = 'BIHEyfhJOuvrjoLpeeBe';
+    const map = new maptilersdk.Map({
+      container: 'map', // container id
+      style: maptilersdk.MapStyle.OUTDOOR,
+      center: [8.94738, 45.97812], // starting position [lng, lat]
+      zoom: 14, // starting zoom
+      pitch: 70,
+      bearing: -100.86,
+      maxPitch: 85,
+      maxZoom: 14,
+      terrain: true,
+      terrainControl: true
+    });
+
+    function fetchLocation() {
+      const locationName = document.getElementById('locationInput').value.trim();
+      const apiKey = '7751541ae2294226995173916240608'; // Your WeatherAPI key
+
+      if (locationName) {
+        fetch(`http://api.weatherapi.com/v1/search.json?key=${apiKey}&q=${locationName}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.length > 0) {
+              const location = data[0]; // Get the first result
+              const latitude = location.lat;
+              const longitude = location.lon;
+              map.flyTo({
+                center: [longitude, latitude],
+                zoom: 14,
+                pitch: 70,
+                bearing: -100.86,
+                essential: true
+              });
+
+              fetchWeatherData('current', locationName);
+              fetchWeatherData('forecast', locationName);
+              fetchWeatherData('astronomy', locationName);
+              fetchWikipediaData(locationName); // Fetch Wikipedia data
+            } else {
+              alert('Location not found. Please try again.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while fetching the location.');
+          });
+      } else {
+        alert('Please enter a location name.');
+      }
+    }
+
+    function fetchWeatherData(apiMethod, locationName) {
+      const apiKey = '7751541ae2294226995173916240608'; // Your WeatherAPI key
+      fetch(`http://api.weatherapi.com/v1/${apiMethod}.json?key=${apiKey}&q=${locationName}`)
+        .then(response => response.json())
+        .then(data => {
+          displayInfo(apiMethod, data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert(`An error occurred while fetching the ${apiMethod} data.`);
+        });
+    }
+
+    function fetchWikipediaData(location) {
+      const url = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&exintro&explaintext&piprop=original&titles=${encodeURIComponent(location)}&format=json&origin=*`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const page = data.query.pages;
+          const pageId = Object.keys(page)[0];
+
+          if (pageId === "-1") {
+            document.getElementById('locationDetails').innerHTML = 'Location not found on Wikipedia.';
+          } else {
+            const extract = page[pageId].extract;
+            const imageUrl = page[pageId].original ? page[pageId].original.source : null;
+            displayLocationDetails(extract, imageUrl);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function displayInfo(apiMethod, data) {
+      const sectionContent = document.getElementById(`${apiMethod}Content`);
+      sectionContent.innerHTML = ''; // Clear previous content
+
+      function addContent(label, value) {
+        if (value !== undefined) {
+          sectionContent.innerHTML += `<p><strong>${label}:</strong> ${value}</p>`;
+        }
+      }
+
+      if (apiMethod === 'current' && data.current) {
+        addContent('Temperature', data.current.temp_c + ' °C');
+        addContent('Condition', data.current.condition.text);
+        addContent('Wind Speed', data.current.wind_kph + ' kph');
+        addContent('Wind Degree', data.current.wind_degree + '°');
+        addContent('Wind Direction', data.current.wind_dir);
+        addContent('Pressure', data.current.pressure_mb + ' mb');
+        addContent('Precipitation', data.current.precip_mm + ' mm');
+        addContent('Humidity', data.current.humidity + '%');
+        addContent('Feels Like', data.current.feelslike_c + ' °C');
+      }
+
+      if (apiMethod === 'forecast' && data.forecast) {
+        data.forecast.forecastday.forEach(day => {
+          sectionContent.innerHTML += `<h4>${day.date}</h4>`;
+          addContent('Max Temperature', day.day.maxtemp_c + ' °C');
+          addContent('Min Temperature', day.day.mintemp_c + ' °C');
+          addContent('Avg Temperature', day.day.avgtemp_c + ' °C');
+          addContent('Condition', day.day.condition.text);
+          addContent('Wind Speed', day.day.maxwind_kph + ' kph');
+          addContent('Wind Direction', day.day.wind_dir);
+          addContent('Precipitation', day.day.totalprecip_mm + ' mm');
+          addContent('Humidity', day.day.avghumidity + '%');
+          addContent('UV Index', day.day.uv);
+          sectionContent.innerHTML += '<hr>';
+        });
+      }
+
+      if (apiMethod === 'astronomy' && data.astronomy) {
+        addContent('Sunrise', data.astronomy.astro.sunrise);
+        addContent('Sunset', data.astronomy.astro.sunset);
+        addContent('Moonrise', data.astronomy.astro.moonrise);
+        addContent('Moonset', data.astronomy.astro.moonset);
+        addContent('Moon Phase', data.astronomy.astro.moon_phase);
+        addContent('Moon Illumination', data.astronomy.astro.moon_illumination + '%');
+      }
+
+      sectionContent.style.display = 'block'; // Show the section content
+    }
+
+    function displayLocationDetails(extract, imageUrl) {
+      const locationDetails = document.getElementById('locationDetails');
+      locationDetails.innerHTML = `<p>${extract}</p>`;
+      if (imageUrl) {
+        locationDetails.innerHTML += `<img src="${imageUrl}" alt="Image of Location">`;
+      }
+    }
+
+    function toggleSection(sectionId) {
+      const sectionContent = document.getElementById(sectionId);
+      sectionContent.style.display = sectionContent.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+</body>
+</html> -->
