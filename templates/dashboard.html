@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EarthWise</title>
+    <link rel="stylesheet" href="/static/dash.css">
+
+</head>
+<body>
+    <!-- Navigation Strip -->
+    <div class="nav-strip">
+        <a href="{{ url_for('index') }}">Go to Chat</a>
+        <a href="static/earth.html">3D Earth</a>
+        <a href="static/terrain_map_maptiler.html">Terrain Maps</a>
+    </div>
+
+    <h1 class="glow">Welcome to your Dashboard, {{ current_user.username }}!</h1>
+
+
+    <!-- Features Section -->
+    <div class="features-container">
+        <div class="feature">
+            <h2>Interactive Chat</h2>
+            <p>Engage in a dynamic chat experience where you can ask complex queries and receive accurate, real-time answers. The chat functionality supports multiple languages and voice input, making it accessible to users from diverse linguistic backgrounds. Whether you're looking for specific data, navigating through datasets, or need assistance with your queries, the interactive chat is designed to provide quick and relevant responses.</p>
+        </div>
+        <div class="feature">
+            <h2>3D Terrain Maps</h2>
+            <p>Dive into the world of 3D terrain maps, where you can explore the Earth's topography in stunning detail. Our advanced mapping technology provides a three-dimensional view of terrains, allowing you to analyze geographical features like mountains, valleys, and rivers with unprecedented clarity. This feature is ideal for geospatial analysis, environmental studies, or simply for those who have a passion for exploring the Earth's diverse landscapes.</p>
+        </div>
+        <div class="feature">
+            <h2>3D Earth Visualization</h2>
+            <p>Experience the world like never before with our 3D Earth visualization tool. This feature offers a fully interactive globe that allows you to rotate, zoom, and explore various regions of the planet. Whether you're tracking weather patterns, studying climate change, or just curious about different parts of the world, the 3D Earth visualization provides a comprehensive and engaging way to interact with geospatial data. It's the perfect tool for educators, researchers, and anyone with an interest in our planet.</p>
+        </div>
+    </div>
+
+
+
+    <!-- Logout form -->
+    <form action="{{ url_for('logout') }}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-primary">Logout</button>
+    </form>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarthWise</title>
+    <link rel="stylesheet" href='/static/styles.css'>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=wC172MaZ"></script>
+</head>
+<body>
+    <div class="main-container">
+        
+        <div class="history-tab">
+            <div class="history-header">
+                <h1>EarthWise</h1>
+                <div class="history-icon-container">
+                    <a href="javascript:void(0);" id="new-chat-icon">
+                        <img src="/static/Newchat.png" alt="New Chat" class="history-clickable-icon" title="New Chat">
+                    </a>
+                </div>                               
+            </div>
+            <ul id="history-list">
+                <!-- History items will be dynamically added here -->
+            </ul>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Go to Dashboard</a>
+                <div class="icon-container">
+                    <a href="/static/earth.html">
+                        <img src="/static/Earthicon.png" alt="Globe" class="clickable-icon" title="Globe">
+                    </a>
+                    <a href="/static/terrain_map_maptiler.html">
+                        <img src="/static/3dterrain.png" alt="3D terrain" class="clickable-icon" title="3D terrain">
+                    </a>
+                </div>
+            </div>
+
+            <div id="chat-window" class="chat-window">
+                {% for chat in chats %}
+                    {% if chat.sender == 'user' %}
+                        <div class="message user-message">{{ chat.content }}</div>
+                    {% else %}
+                        <div class="message bot-message">{{ chat.content }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            
+
+            <div class="chat-input-container">
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <!-- Add more languages as needed -->
+                </select>
+                <button id="toggle-voice-button"><img src="/static/Mic.png" height="35px" width="35px" title="Speak"></button>
+                <input id="user-input" type="text" placeholder="Message EarthWise..." autofocus>
+                <button id="send-button"><img src="/static/send.png" height="20px" width="25px" title="Send"></button>
+            </div>
+            
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
